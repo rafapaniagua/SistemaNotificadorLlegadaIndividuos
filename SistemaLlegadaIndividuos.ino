@@ -1,3 +1,5 @@
+#include "LowPower.h"
+
 #define sensor 2
 #define led 12
 #define buzzer 11
@@ -45,30 +47,36 @@ int semicorcheap=semicorchea*1.5;
 int melodia[] = {Do,Do,Re,Do,Fa,Mi,Do,Do,Re,Do,Sol,Fa,Do,Do,Do2,La,Fa,Mi,Re,LaS,LaS,La,Fa,Sol,Fa};
 int notas[] = {corchea,corchea,negra,negra,negra,blanca,corchea,corchea,negra,negra,negra,blanca,corchea,corchea,negra,negra,negra,negra,blanca,corchea,corchea,negra,negra,negra,blanca};
 
+int valorSensor = 0;
+
 void setup() {
   // put your setup code here, to run once:
   pinMode(sensor, INPUT_PULLUP);
   pinMode(led, OUTPUT);
   pinMode(buzzer,OUTPUT);
-  Serial.begin(9600);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  int value = digitalRead(sensor);
+  attachInterrupt(0, interrupcion, LOW);
+  LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
+  detachInterrupt(0);
+  
+    alarma();
+}
 
-  if (value == LOW) {
-    digitalWrite(led, HIGH);
+void alarma(){
+  
     //escribimos las notas con el siguiente esquema
+    digitalWrite(led, HIGH);
     for(int cont=0;cont<25;cont++){
       tone(buzzer,melodia[cont],notas[cont]);
       delay(notas[cont]+50);
     }
-    Serial.println("prendido");
-  } else {
     digitalWrite(led, LOW);
-    Serial.println("apagado");
-  }
- 
-  delay(1000);
+}
+
+void interrupcion() {
+  // Con este metodo leemos el valor del sensor
+  valorSensor = digitalRead(sensor);
 }
