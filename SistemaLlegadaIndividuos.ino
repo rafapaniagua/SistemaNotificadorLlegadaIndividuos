@@ -78,13 +78,9 @@ void loop() {
   //El modo sleep() del Arduino se rompe al efectuarse la interrupcion del sensor magnético
   detachInterrupt(0);
 
-  //Cuando el valor del sensor es LOW, significa que fue activado por un imán
-  while(valorSensor == LOW){
-    //Nos dirige a un método que controla una alarma de luz y sonido
-    alarma();
-    //Antes de volver a comenzar con la melodía, comprobamos si el imán sigue activando el sensor
-    revisarSensor();
-  }
+  //El siguiente método se ejectua si el sensor fue activado
+  //Nos dirige a un método que controla una alarma de luz y sonido
+  alarma();
 }
 
 void alarma(){
