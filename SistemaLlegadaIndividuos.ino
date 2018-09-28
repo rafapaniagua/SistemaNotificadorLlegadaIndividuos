@@ -3,6 +3,7 @@
 #define sensor 2
 #define led 12
 #define buzzer 11
+#define potenc A0
 
 //octava alta
 int Si2 =1975;
@@ -31,21 +32,21 @@ int Re = 587;
 int DoS =554;
 int Do = 523;
 //definimos la variable del tiempo
-int bpm= 480;
+int bpm;
 //definimos las notas y la relacion de tiempo entre las mismas
-int negra= 60000/bpm; 
-int negrap=negra*1.5;
-int blanca= negra*2;
-int blancap=blanca*1.5;
-int redonda= negra*4;
-int redondap= redonda*1.5;
-int corchea= negra/2;
-int corcheap=corchea*1.5;
-int semicorchea= negra/4;
-int semicorcheap=semicorchea*1.5;
+int negra; 
+int negrap;
+int blanca;
+int blancap;
+int redonda;
+int redondap;
+int corchea;
+int corcheap;
+int semicorchea;
+int semicorcheap;
 
 int melodia[] = {Do,Do,Re,Do,Fa,Mi,Do,Do,Re,Do,Sol,Fa,Do,Do,Do2,La,Fa,Mi,Re,LaS,LaS,La,Fa,Sol,Fa};
-int notas[] = {corchea,corchea,negra,negra,negra,blanca,corchea,corchea,negra,negra,negra,blanca,corchea,corchea,negra,negra,negra,negra,blanca,corchea,corchea,negra,negra,negra,blanca};
+int notas[25];
 
 int valorSensor = 0;
 
@@ -54,29 +55,63 @@ void setup() {
   pinMode(sensor, INPUT_PULLUP);
   pinMode(led, OUTPUT);
   pinMode(buzzer,OUTPUT);
+  Serial.begin(9600);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  attachInterrupt(0, interrupcion, LOW);
+  attachInterrupt(0, revisarSensor, LOW);
   LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
   detachInterrupt(0);
-  
+
+  while(valorSensor == LOW){  
     alarma();
+
+    revisarSensor();
+  }
 }
 
 void alarma(){
-  
     //escribimos las notas con el siguiente esquema
+    velocidadCancion();
     digitalWrite(led, HIGH);
     for(int cont=0;cont<25;cont++){
-      tone(buzzer,melodia[cont],notas[cont]);
-      delay(notas[cont]+50);
+      revisarSensor();
+      if(valorSensor == LOW){
+        tone(buzzer,melodia[cont],notas[cont]);
+        delay(notas[cont]+50);
+      }
     }
     digitalWrite(led, LOW);
 }
 
-void interrupcion() {
+void velocidadCancion(){
+  bpm = analogRead(potenc);
+  if(bpm < 120){
+    bpm = 120;
+  }
+  Serial.print("Velocidad de la canción = ");
+  Serial.println(bpm);
+  negra= 60000/bpm; 
+  negrap=negra*1.5;
+  blanca= negra*2;
+  blancap=blanca*1.5;
+  redonda= negra*4;
+  redondap= redonda*1.5;
+  corchea= negra/2;
+  corcheap=corchea*1.5;
+  semicorchea= negra/4;
+  semicorcheap=semicorchea*1.5;
+  
+  notas[0]=corchea; notas[1]=corchea; notas[2]=negra; notas[3]=negra; notas[4]=negra;
+  notas[5]=blanca; notas[6]=corchea; notas[7]=corchea; notas[8]=negra; notas[9]=negra;
+  notas[10]=negra; notas[11]=blanca; notas[12]=corchea; notas[13]=corchea; notas[14]=negra;
+  notas[15]=negra; notas[16]=negra; notas[17]=negra; notas[18]=blanca; notas[19]=corchea;
+  notas[20]=corchea; notas[21]=negra; notas[22]=negra; notas[23]=negra; notas[24]=blanca;
+
+}
+
+void revisarSensor() {
   // Con este metodo leemos el valor del sensor
   valorSensor = digitalRead(sensor);
 }
